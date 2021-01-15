@@ -1,7 +1,15 @@
 package com.example.accessingdatajpa;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +23,12 @@ public class AccessingDataJpaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AccessingDataJpaApplication.class);
 	}
+
+	@Autowired
+	private CustomerService customerService;
+
+	@Autowired
+	private DataSource dataSource;
 
 	@Bean
 	public CommandLineRunner demo(CustomerRepository repository) {
@@ -47,11 +61,31 @@ public class AccessingDataJpaApplication {
 			repository.findByLastName("Bauer").forEach(bauer -> {
 				log.info(bauer.toString());
 			});
-			// for (Customer bauer : repository.findByLastName("Bauer")) {
-			// 	log.info(bauer.toString());
-			// }
-			log.info("");
+
+			customer.setLastName(customer.getLastName() + "-2");
+			checkDatabase(customer);
+			customerService.modifyCustomer(customer);
+
+			checkDatabase(customer);
+
+			log.info("end");
 		};
+	}
+
+	private void checkDatabase(Customer customer) throws SQLException {
+		try (Connection connection = dataSource.getConnection()) {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("select * from customer");
+			ResultSetMetaData metadata = rs.getMetaData();
+			int columns = metadata.getColumnCount();
+			while (rs.next()) {
+				StringBuilder sb = new StringBuilder();
+				for (int i = 1; i <= columns; i++) {
+					sb.append(metadata.getColumnName(i)).append(" = ").append(rs.getString(i)).append(" ");
+				}
+				System.out.println(sb.toString());
+			}
+		}
 	}
 
 }
