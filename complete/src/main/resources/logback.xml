@@ -1,0 +1,31 @@
+<configuration>
+            <appender name="FILE-ROLLING" class="ch.qos.logback.core.FileAppender">
+                <file>/Users/constantinocronemberger/dev/logs/testapp.log</file>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <customFields>
+                        {
+                        "env": "${ENVIRONMENT}",
+                        "version": "${VERSION}"
+                        }
+                    </customFields>
+                </encoder>
+            </appender>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>%logger{15} - %message%n%xException{5}</pattern>
+                </encoder>
+            </appender>
+
+    <logger name="play" level="OFF"/>
+    <logger name="application" level="OFF"/>
+    <logger name="com.glovoapp" level="INFO"/>
+    <logger name="org.zendesk.client.v2" level="OFF"/>
+    <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="OFF"/>
+    <!--logger name="org.hibernate.SQL" level="DEBUG"/-->
+    <logger name="org.springframework.transaction.interceptor" level="trace"/>
+
+    <root level="INFO">
+        <appender-ref ref="FILE-ROLLING"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
