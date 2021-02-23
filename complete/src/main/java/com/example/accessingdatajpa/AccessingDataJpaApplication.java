@@ -1,6 +1,7 @@
 package com.example.accessingdatajpa;
 
 import com.timgroup.statsd.NonBlockingStatsDClient;
+import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer.SpanBuilder;
 import java.sql.Connection;
@@ -55,12 +56,11 @@ public class AccessingDataJpaApplication {
 		io.opentracing.Tracer openTracer = io.opentracing.util.GlobalTracer.get();
 		Span firstSpan = openTracer.activeSpan();
 
-		SpanBuilder spanBuilder = openTracer.buildSpan("method");
+		SpanBuilder spanBuilder = openTracer.buildSpan("my-operation");
+		spanBuilder.ignoreActiveSpan();
 		Span span = spanBuilder.start();
 		span.setBaggageItem("name","my-operation");
-		openTracer.activateSpan(span);
-
-		span.setOperationName("my-operation");
+		Scope scope = openTracer.activateSpan(span);
 		span.setTag("mytag", "test-tag");
 		span.log("span log");
 
@@ -71,6 +71,9 @@ public class AccessingDataJpaApplication {
 		Span newSpan2 = openTracer.activeSpan();
 
 		span.finish();
+		scope.close();
+
+		firstSpan = openTracer.activeSpan();
 
 		Span newSpan = CurrentSpanThreadLocal.getCurrentSpan();
 		CurrentSpanThreadLocal.setCurrentSpan(newSpan2);
@@ -81,10 +84,10 @@ public class AccessingDataJpaApplication {
 
 		return (args) -> {
 			io.opentracing.Tracer openTracer2 = io.opentracing.util.GlobalTracer.get();
-			SpanBuilder spanBuilder2 = openTracer2.buildSpan("method");
+			SpanBuilder spanBuilder2 = openTracer2.buildSpan("db-operations-new");
+			//spanBuilder2.asChildOf(span);
 			Span span2 = spanBuilder2.start();
-			openTracer2.activateSpan(span2);
-			span2.setOperationName("db-operations-new");
+			Scope scope2 = openTracer2.activateSpan(span2);
 			span2.setBaggageItem("name","db-operations-new");
 
 			// save a few customers
@@ -130,19 +133,20 @@ public class AccessingDataJpaApplication {
 
 			log.info("end");
 			span2.finish();
+			scope2.close();
 		};
 	}
 
 	private void getParallelMethodTx(Span span2) {
 		io.opentracing.Tracer openTracer = io.opentracing.util.GlobalTracer.get();
-		SpanBuilder spanBuilder = openTracer.buildSpan("method");
+		SpanBuilder spanBuilder = openTracer.buildSpan("parallel-tx2");
 		spanBuilder.asChildOf(span2);
 		Span span = spanBuilder.start();
-		openTracer.activateSpan(span);
-		span.setOperationName("parallel-tx2");
+		Scope scope = openTracer.activateSpan(span);
 		span.setBaggageItem("name", "parallel-tx2");
 		customerService.parallelMethodTx(span2);
 		span.finish();
+		scope.close();
 	}
 
 	private void subMethod(Logger logger) {

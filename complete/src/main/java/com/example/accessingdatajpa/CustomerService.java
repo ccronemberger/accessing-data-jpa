@@ -1,5 +1,7 @@
 package com.example.accessingdatajpa;
 
+import datadog.trace.api.GlobalTracer;
+import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer.SpanBuilder;
 import javax.transaction.Transactional;
@@ -30,14 +32,14 @@ public class CustomerService {
 
     public void parallelMethod(Span parentSpan) {
         io.opentracing.Tracer openTracer = io.opentracing.util.GlobalTracer.get();
-        SpanBuilder spanBuilder = openTracer.buildSpan("method");
+        SpanBuilder spanBuilder = openTracer.buildSpan("parallel-no-tx2");
         spanBuilder.asChildOf(parentSpan);
         Span span = spanBuilder.start();
-        openTracer.activateSpan(span);
-        span.setOperationName("parallel-no-tx2");
+        Scope scope = openTracer.activateSpan(span);
         span.setBaggageItem("name", "parallel-no-tx2");
         parallelMethodImpl();
         span.finish();
+        scope.close();
     }
 
     private void parallelMethodImpl() {
