@@ -36,3 +36,7 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+bootRun {
+	jvmArgs = ["-javaagent:/Users/constantinocronemberger/dev/dd-java-agent-0.74.0.jar", "-Ddd.profiling.enabled=true", "-Ddd.logs.injection=true"]
+}
