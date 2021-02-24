@@ -1,6 +1,6 @@
 <configuration>
             <appender name="FILE-ROLLING" class="ch.qos.logback.core.FileAppender">
-                <file>/Users/constantinocronemberger/dev/logs/testapp.log</file>
+                <file>C:/dev/logs/testapp.log</file>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <customFields>
                         {

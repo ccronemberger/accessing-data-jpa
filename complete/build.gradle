@@ -19,6 +19,7 @@ dependencies {
 	implementation 'io.opentracing:opentracing-api:0.33.0'
 	implementation 'io.opentracing:opentracing-util:0.33.0'
 	implementation 'com.datadoghq:java-dogstatsd-client:2.11.0'
+	implementation 'org.mockito:mockito-core:3.8.0'
 
 	// This can't go in the classpath because it is the agent. Adding it here just to let the IDE find the source files.
 	compileOnly 'com.datadoghq:dd-java-agent:0.74.0'

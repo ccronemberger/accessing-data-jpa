@@ -13,6 +13,11 @@ public class Customer {
 	private Long id;
 	private String firstName;
 	private String lastName;
+	private String lastName2;
+	private String lastName3;
+	private String lastName4;
+	private String lastName5;
+	private String lastName6;
 
 	protected Customer() {}
 
