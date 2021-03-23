@@ -15,18 +15,18 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
-	implementation 'com.datadoghq:dd-trace-api:0.74.0'
-	implementation 'io.opentracing:opentracing-api:0.33.0'
-	implementation 'io.opentracing:opentracing-util:0.33.0'
-	implementation 'com.datadoghq:java-dogstatsd-client:2.11.0'
+	implementation 'com.datadoghq:dd-trace-api:0.21.1'
+	implementation 'io.opentracing:opentracing-api:0.31.0'
+	implementation 'io.opentracing:opentracing-util:0.31.0'
+	implementation 'com.datadoghq:java-dogstatsd-client:2.8.1'
 	implementation 'org.mockito:mockito-core:3.8.0'
 
 	// This can't go in the classpath because it is the agent. Adding it here just to let the IDE find the source files.
-	compileOnly 'com.datadoghq:dd-java-agent:0.74.0'
+	/*compileOnly 'com.datadoghq:dd-java-agent:0.74.0'
 	compileOnly('com.datadoghq:dd-trace-core:0.52.0') {
 		exclude group: 'com.datadoghq', module: 'internal-api'
 		exclude group: 'com.datadoghq', module: 'thread-utils'
-	}
+	}*/
 	runtimeOnly 'com.h2database:h2'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -38,5 +38,10 @@ test {
 }
 
 bootRun {
-	jvmArgs = ["-javaagent:/Users/constantinocronemberger/dev/dd-java-agent-0.74.0.jar", "-Ddd.profiling.enabled=true", "-Ddd.logs.injection=true"]
+    jvmArgs = 
+        [/*"-javaagent:/Users/constantinocronemberger/dev/dd-java-agent-0.74.0.jar", \
+         "-Ddd.profiling.enabled=true", \
+         "-Ddd.logs.injection=true", */
+         "-agentpath:/var/folders/mh/9nvrgj2174b8g_1qcgx5p2t80000gp/T/NBProfiler2283218870648765977.link/deployed/jdk16/mac/libprofilerinterface.jnilib=/var/folders/mh/9nvrgj2174b8g_1qcgx5p2t80000gp/T/NBProfiler2283218870648765977.link,5140"
+     ]
 }

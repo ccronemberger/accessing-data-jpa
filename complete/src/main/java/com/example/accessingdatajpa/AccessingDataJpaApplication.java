@@ -1,6 +1,7 @@
 package com.example.accessingdatajpa;
 
 import com.timgroup.statsd.NonBlockingStatsDClient;
+import datadog.trace.api.GlobalTracer;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer.SpanBuilder;
@@ -26,13 +27,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @SpringBootApplication
-@EnableJpaRepositories(repositoryFactoryBeanClass = MockRepositoryFactoryBean.class)
+//@EnableJpaRepositories(repositoryFactoryBeanClass = MockRepositoryFactoryBean.class)
 public class AccessingDataJpaApplication {
 
 	private static final Logger log = LoggerFactory.getLogger(AccessingDataJpaApplication.class);
 
-	public static void main(String[] args) {
-		SpringApplication.run(AccessingDataJpaApplication.class);
+	public static void main(String[] args) throws InterruptedException {
+	    SpringApplication.run(AccessingDataJpaApplication.class);
 	}
 
 	@Autowired
@@ -62,7 +63,7 @@ public class AccessingDataJpaApplication {
 		spanBuilder.ignoreActiveSpan();
 		Span span = spanBuilder.start();
 		span.setBaggageItem("name","my-operation");
-		Scope scope = openTracer.activateSpan(span);
+		Scope scope = openTracer.scopeManager().activate(span, false);
 		span.setTag("mytag", "test-tag");
 		span.log("span log");
 
@@ -89,7 +90,8 @@ public class AccessingDataJpaApplication {
 			SpanBuilder spanBuilder2 = openTracer2.buildSpan("db-operations-new");
 			//spanBuilder2.asChildOf(span);
 			Span span2 = spanBuilder2.start();
-			Scope scope2 = openTracer2.activateSpan(span2);
+			Scope scope2 = openTracer2.scopeManager()
+									  .activate(span2, false);
 			span2.setBaggageItem("name","db-operations-new");
 
 			// save a few customers
@@ -144,7 +146,8 @@ public class AccessingDataJpaApplication {
 		SpanBuilder spanBuilder = openTracer.buildSpan("parallel-tx2");
 		spanBuilder.asChildOf(span2);
 		Span span = spanBuilder.start();
-		Scope scope = openTracer.activateSpan(span);
+		Scope scope = openTracer.scopeManager()
+								.activate(span, false);
 		span.setBaggageItem("name", "parallel-tx2");
 		customerService.parallelMethodTx(span2);
 		span.finish();
@@ -157,10 +160,10 @@ public class AccessingDataJpaApplication {
 		Span activeSpan = openTracer.activeSpan();
 
 		Map<String, Object> markers = new HashMap<>();
-		markers.put("dd.trace_id", activeSpan.context().toTraceId());
-		markers.put("dd.span_id", activeSpan.context().toSpanId());
+		markers.put("dd.trace_id",  GlobalTracer.get().getTraceId());
+		markers.put("dd.span_id", GlobalTracer.get().getSpanId());
 		Marker marker = Markers.appendEntries(markers);
-		logger.error(marker, "span trace:" + activeSpan.context().toSpanId() + " span id: " + activeSpan.context().toTraceId());
+		logger.error(marker, "span trace:" + GlobalTracer.get().getSpanId() + " span id: " + GlobalTracer.get().getTraceId());
 	}
 
 	private void checkDatabase(Customer customer) throws SQLException {

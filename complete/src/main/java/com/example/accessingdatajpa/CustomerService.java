@@ -35,7 +35,7 @@ public class CustomerService {
         SpanBuilder spanBuilder = openTracer.buildSpan("parallel-no-tx2");
         spanBuilder.asChildOf(parentSpan);
         Span span = spanBuilder.start();
-        Scope scope = openTracer.activateSpan(span);
+        Scope scope = openTracer.scopeManager().activate(span, false);
         span.setBaggageItem("name", "parallel-no-tx2");
         parallelMethodImpl();
         span.finish();
